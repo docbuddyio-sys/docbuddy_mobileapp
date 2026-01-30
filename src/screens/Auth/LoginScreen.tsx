@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -8,24 +8,11 @@ import {
   Platform,
 } from "react-native";
 import AuthHeader from "../../components/AuthHeader";
-import CustomInput from "../../components/CustomInput";
-import CustomButton from "../../components/CustomButton";
-import OrDivider from "../../components/OrDivider";
-import SocialLoginButtons from "../../components/SocialLoginButtons";
+import GoogleSignInButton from "../../components/GoogleSignInButton";
 
 const LoginScreen = ({ navigation }: any) => {
-  const [phoneNumber, setPhoneNumber] = useState("");
-
-  const handleSubmit = () => {
-    // Handle login logic
-    console.log("Phone Number:", phoneNumber);
-    // Navigate directly to Home screen
-    navigation.navigate("Home");
-  };
-
-  const handleSocialLogin = (provider: string) => {
-    // Handle social login
-    console.log("Login with:", provider);
+  const handleGoogleLogin = () => {
+    console.log("Google Login");
     navigation.navigate("Home");
   };
 
@@ -36,49 +23,34 @@ const LoginScreen = ({ navigation }: any) => {
     >
       <AuthHeader />
 
-      <ScrollView
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
-        {/* Content */}
-        <View className="px-6 pt-10 pb-12">
-          {/* Login Title */}
-          <Text className="text-4xl font-bold text-neutral-gray900 mb-2 tracking-tight">
-            Welcome back
-          </Text>
-          <Text className="text-base text-neutral-gray500 mb-10">
-            Sign in to access your documents.
-          </Text>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
+        <View className="flex-1 px-6 pt-16 pb-12 justify-between">
+          {/* Top Content */}
+          <View>
+            <Text className="text-3xl font-bold text-neutral-gray900 tracking-tight mb-3">
+              Welcome back
+            </Text>
 
-          {/* Form */}
-          <View className="mb-8">
-            {/* Phone Number Input */}
-            <CustomInput
-              label="Phone Number"
-              placeholder="Enter your Phone Number"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              keyboardType="phone-pad"
-            />
+            <Text className="text-sm text-neutral-gray600 leading-relaxed mb-12">
+              Sign in to Doc Buddy and continue managing your documents securely and professionally.
+            </Text>
+
+            {/* Google Login */}
+            <GoogleSignInButton onPress={handleGoogleLogin} />
+
+            {/* Trust Text */}
+            <Text className="text-xs text-neutral-gray500 text-center mt-4">
+              Secure sign-in powered by Google
+            </Text>
           </View>
 
-          {/* Submit Button */}
-          <CustomButton title="Login" onPress={handleSubmit} className="mb-6" />
-
-          {/* Sign Up Link */}
-          <View className="flex-row justify-center mb-10">
-            <Text className="text-neutral-gray600 text-sm font-medium">
-              Don't have an account?{" "}
-            </Text>
-            <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-              <Text className="text-primary text-sm font-bold">Sign Up</Text>
+          {/* Footer */}
+          <View className="flex-row justify-center mt-12">
+            <Text className="text-sm text-neutral-gray600">Don’t have an account?</Text>
+            <TouchableOpacity onPress={() => navigation.navigate("Signup")} className="ml-1">
+              <Text className="text-sm font-semibold text-primary">Sign up</Text>
             </TouchableOpacity>
           </View>
-
-          <OrDivider />
-
-          <SocialLoginButtons onPress={handleSocialLogin} />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
