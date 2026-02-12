@@ -70,21 +70,20 @@ const OnboardingScreen = ({ navigation }: any) => {
   const currentSlide = slides[currentIndex];
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-white">
       {/* Content Container */}
-      <View className="flex-1 px-6 pt-16">
-        {/* Blue accent bar */}
-        <View className="w-1 h-24 bg-blue-600 rounded-full mb-4" />
-
+      <View className="flex-1 px-6 pt-16 ">
         {/* Title */}
-        <Text className="text-2xl font-bold text-gray-900 mb-2">{currentSlide.title}</Text>
 
-        {/* Subtitle */}
-        <Text className="text-lg font-semibold text-gray-900 mb-3">{currentSlide.subtitle}</Text>
+        <View className="border-l-4 border-blue-600 mb-8 px-4">
+          <Text className="text-2xl font-bold text-gray-900 mb-2">{currentSlide.title}</Text>
 
-        {/* Description */}
-        <Text className="text-sm text-gray-600 leading-6 mb-8">{currentSlide.description}</Text>
+          {/* Subtitle */}
+          <Text className="text-lg font-semibold text-gray-900 mb-3">{currentSlide.subtitle}</Text>
 
+          {/* Description */}
+          <Text className="text-sm text-gray-600 leading-6">{currentSlide.description}</Text>
+        </View>
         {/* Illustration */}
         <View className="flex-1 items-center justify-center">
           <Image

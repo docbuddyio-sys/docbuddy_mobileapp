@@ -8,11 +8,11 @@ interface CustomButtonProps extends TouchableOpacityProps {
 const CustomButton: React.FC<CustomButtonProps> = ({ title, className = "", ...props }) => {
   return (
     <TouchableOpacity
-      className={`bg-primary rounded-xl py-4 items-center shadow-lg shadow-primary/20 ${className}`}
+      className={`bg-primary rounded-xl p-2 text-xs items-center shadow-lg shadow-primary/20 ${className}`}
       activeOpacity={0.8}
       {...props}
     >
-      <Text className="text-white text-lg font-bold tracking-tight">{title}</Text>
+      <Text className="text-white text-sm font-bold tracking-tight">{title}</Text>
     </TouchableOpacity>
   );
 };

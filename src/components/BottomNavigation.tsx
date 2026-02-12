@@ -26,7 +26,7 @@ const BottomNavigation: React.FC<BottomNavProps> = ({ activeTab = "home", onTabC
   ];
 
   const rightTabs = [
-    { id: "share", icon: "share-social-outline", label: "Share" },
+    { id: "upload", icon: "cloud-upload-outline", label: "Upload" },
     { id: "profile", icon: "person-outline", label: "Profile" },
   ];
 

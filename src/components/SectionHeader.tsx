@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 interface SectionHeaderProps {
@@ -10,6 +10,9 @@ interface SectionHeaderProps {
   onAvatarPress?: () => void;
   rightElement?: React.ReactNode;
   isHome?: boolean;
+  searchValue?: string;
+  onSearchChange?: (text: string) => void;
+  userImageUrl?: string | null;
 }
 
 const SectionHeader: React.FC<SectionHeaderProps> = ({
@@ -20,6 +23,9 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
   onAvatarPress,
   rightElement,
   isHome = false,
+  searchValue,
+  onSearchChange,
+  userImageUrl,
 }) => {
   return (
     <View className="bg-primary pt-14 pb-8 px-6 relative overflow-hidden rounded-b-[32px]">
@@ -38,7 +44,11 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
               activeOpacity={0.8}
               className="w-16 h-16 rounded-2xl bg-neutral-gray50 items-center justify-center mr-4 shadow-sm overflow-hidden"
             >
-              <Text className="text-4xl">👨</Text>
+              {userImageUrl ? (
+                <Image source={{ uri: userImageUrl }} className="w-full h-full" />
+              ) : (
+                <Text className="text-4xl">👨</Text>
+              )}
             </TouchableOpacity>
             <View>
               <Text className="text-white text-sm font-medium opacity-90">Hello!</Text>
@@ -68,12 +78,14 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
       )}
 
       {showSearch && (
-        <View className="bg-white rounded-2xl px-4 py-4 flex-row items-center z-10 shadow-lg shadow-black/10">
+        <View className="bg-white rounded-2xl px-4 py-1 flex-row items-center z-10 shadow-lg shadow-black/10">
           <Ionicons name="search-outline" size={22} color="#9CA3AF" />
           <TextInput
             className="flex-1 ml-3 text-base text-neutral-gray900 font-medium"
             placeholder="Search Documents..."
             placeholderTextColor="#9CA3AF"
+            value={searchValue}
+            onChangeText={onSearchChange}
           />
         </View>
       )}

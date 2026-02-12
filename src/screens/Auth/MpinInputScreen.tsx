@@ -61,7 +61,7 @@ const MpinInputScreen = () => {
           placeholder="*** ***"
           rightIcon={<Text className="text-2xl">{showConfirmMpin ? "👁️" : "👁️‍🗨️"}</Text>}
           onRightIconPress={() => setShowConfirmMpin(!showConfirmMpin)}
-          containerStyle="mb-8"
+          className="mb-8"
         />
 
         {/* Continue Button */}

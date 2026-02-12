@@ -3,15 +3,23 @@ import { TouchableOpacity, View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 interface DocumentCardProps {
-  id: number;
+  id: number | string;
   name: string;
   date: string;
   size: string;
   pages: number;
   onPress?: () => void;
+  onDelete?: () => void;
 }
 
-const DocumentCard: React.FC<DocumentCardProps> = ({ name, date, size, pages, onPress }) => {
+const DocumentCard: React.FC<DocumentCardProps> = ({
+  name,
+  date,
+  size,
+  pages,
+  onPress,
+  onDelete,
+}) => {
   return (
     <TouchableOpacity
       className="bg-white rounded-[24px] p-4 mb-4 flex-row items-center border border-neutral-gray100 shadow-sm"
@@ -50,8 +58,11 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ name, date, size, pages, on
 
       {/* Refined Action Buttons */}
       <View className="flex-row items-center ml-2">
-        <TouchableOpacity className="w-10 h-10 items-center justify-center bg-neutral-gray50 rounded-xl mr-2">
-          <Ionicons name="share-social-outline" size={20} color="#3B82F6" />
+        <TouchableOpacity
+          onPress={onDelete}
+          className="w-10 h-10 items-center justify-center bg-red-50 rounded-xl mr-2"
+        >
+          <Ionicons name="trash-outline" size={20} color="#EF4444" />
         </TouchableOpacity>
         <TouchableOpacity className="w-10 h-10 items-center justify-center bg-neutral-gray50 rounded-xl">
           <Ionicons name="ellipsis-vertical" size={20} color="#6B7280" />

@@ -14,6 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import SectionHeader from "../../components/SectionHeader";
 import CustomInput from "../../components/CustomInput";
 import CustomButton from "../../components/CustomButton";
+import { useUser } from "../../context/UserContext";
 
 interface ProfileScreenProps {
   onBack?: () => void;
@@ -21,11 +22,20 @@ interface ProfileScreenProps {
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack }) => {
   const navigation = useNavigation<any>();
-  const [name, setName] = useState("Berlin Smith");
-  const [email, setEmail] = useState("berlin.smith@example.com");
-  const [phoneNumber, setPhoneNumber] = useState("+91 9876543210");
+  const { user, updateUser, loading } = useUser();
+  const [name, setName] = useState(user.name);
+  const [email, setEmail] = useState(user.email);
+  const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber);
   const [isEditing, setIsEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(user.profileImage);
+
+  // Sync with user context when it loads
+  React.useEffect(() => {
+    setName(user.name);
+    setEmail(user.email);
+    setPhoneNumber(user.phoneNumber);
+    setProfileImage(user.profileImage);
+  }, [user]);
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -49,9 +59,18 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack }) => {
     });
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // Logic to save profile data would go here
+  const handleSave = async () => {
+    try {
+      await updateUser({
+        name,
+        email,
+        phoneNumber,
+        profileImage,
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error saving profile:", error);
+    }
   };
 
   return (
@@ -127,7 +146,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack }) => {
             </View>
 
             {isEditing && (
-              <View className="mt-8 flex-row space-x-4">
+              <View className="mt-8 flex-row gap-4">
                 <View className="flex-1">
                   <CustomButton
                     title="Cancel"

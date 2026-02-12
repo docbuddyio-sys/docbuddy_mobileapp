@@ -3,7 +3,7 @@ import { TouchableOpacity, View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 interface CategoryCardProps {
-  id: number;
+  id: string;
   name: string;
   count?: number;
   icon: string;

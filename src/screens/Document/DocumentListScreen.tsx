@@ -7,10 +7,11 @@ import {
   TextInput,
   Image,
   Dimensions,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { DUMMY_DOCUMENTS } from "../../data/dummyData";
+import { useDocuments } from "../../context/DocumentContext";
 
 const { width } = Dimensions.get("window");
 
@@ -25,20 +26,24 @@ const DocumentListScreen: React.FC<DocumentListScreenProps> = ({
 }) => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
+  const { getDocumentsByCategory, searchDocuments, deleteDocument, documents } = useDocuments();
 
   // Determine category from props or route params
   const initialCategory = categoryProps || (route.params?.categoryName ?? "Documents");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredDocuments = DUMMY_DOCUMENTS.filter((doc) => {
-    const matchesCategory =
-      initialCategory === "Documents" ||
-      initialCategory === null ||
-      doc.category === initialCategory;
-    const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Get filtered documents
+  const getFilteredDocuments = () => {
+    if (searchQuery) {
+      return searchDocuments(searchQuery);
+    }
+    if (initialCategory === "Documents" || initialCategory === null) {
+      return documents;
+    }
+    return getDocumentsByCategory(initialCategory);
+  };
 
+  const filteredDocuments = getFilteredDocuments();
   const displayTitle = initialCategory || "Documents";
 
   const handleBack = () => {
@@ -47,6 +52,24 @@ const DocumentListScreen: React.FC<DocumentListScreenProps> = ({
     } else {
       navigation.goBack();
     }
+  };
+
+  const handleDeleteDocument = (id: string, name: string) => {
+    Alert.alert("Delete Document", `Are you sure you want to delete "${name}"?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          const success = await deleteDocument(id);
+          if (success) {
+            Alert.alert("Success", "Document deleted successfully");
+          } else {
+            Alert.alert("Error", "Failed to delete document");
+          }
+        },
+      },
+    ]);
   };
 
   return (
@@ -95,14 +118,19 @@ const DocumentListScreen: React.FC<DocumentListScreenProps> = ({
                 onPress={() => navigation.navigate("DocumentDetail", { documentId: doc.id })}
               >
                 <Image
-                  source={doc.image}
+                  source={{ uri: doc.imageUri }}
                   className="w-16 h-12 rounded-lg bg-gray-200"
                   resizeMode="cover"
                 />
                 <View className="flex-1 ml-4">
                   <Text className="text-base font-bold text-gray-900">{doc.name}</Text>
                   <Text className="text-xs text-gray-500 mt-1">
-                    {doc.uploadDate} , {doc.size}
+                    {new Date(doc.createdAt).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}{" "}
+                    , {doc.size}
                   </Text>
                   <Text className="text-xs text-gray-500">{doc.pages} Pages</Text>
                 </View>
@@ -110,8 +138,8 @@ const DocumentListScreen: React.FC<DocumentListScreenProps> = ({
                   <TouchableOpacity className="mr-4">
                     <Ionicons name="share-social-outline" size={24} color="#333" />
                   </TouchableOpacity>
-                  <TouchableOpacity>
-                    <Ionicons name="ellipsis-vertical" size={20} color="#333" />
+                  <TouchableOpacity onPress={() => handleDeleteDocument(doc.id, doc.name)}>
+                    <Ionicons name="trash-outline" size={20} color="#EF4444" />
                   </TouchableOpacity>
                 </View>
               </TouchableOpacity>

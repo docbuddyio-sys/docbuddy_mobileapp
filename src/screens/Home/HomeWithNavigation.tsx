@@ -29,11 +29,11 @@ const HomeWithNavigation = () => {
 
       const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
       return () => subscription.remove();
-    }, [activeTab])
+    }, [activeTab]),
   );
 
   const handleTabChange = (tab: string) => {
-    if (tab === "scan") {
+    if (tab === "scan" || tab === "upload") {
       setIsScanModalVisible(true);
       return;
     }
@@ -86,7 +86,12 @@ const HomeWithNavigation = () => {
     switch (activeTab) {
       case "home":
         return (
-          <HomeScreen onCategoryPress={handleCategoryPress} onAvatarPress={handleAvatarPress} />
+          <HomeScreen
+            onCategoryPress={handleCategoryPress}
+            onAvatarPress={handleAvatarPress}
+            onSeeAllRecent={() => setActiveTab("documents")}
+            onViewAllCategories={() => setActiveTab("documents")}
+          />
         );
       case "documents":
         return (
