@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 interface SectionHeaderProps {
@@ -28,12 +28,13 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
   userImageUrl,
 }) => {
   return (
-    <View className="bg-primary pt-14 pb-8 px-6 relative overflow-hidden rounded-b-[32px]">
-      {/* Subtle glassmorphism/gradient effect */}
-      <View
-        className="absolute top-0 left-0 right-0 bottom-0 bg-primary-dark opacity-10"
-        style={{ transform: [{ rotate: "-15deg" }, { scale: 1.5 }] }}
-      />
+    <ImageBackground
+      source={require("../../assets/pattern.png")}
+      resizeMode="cover"
+      className="bg-primary pt-14 pb-8 px-6 relative overflow-hidden rounded-b-[32px]"
+    >
+      {/* Subtle overlay to ensure text readability if the pattern is light */}
+      <View className="absolute top-0 left-0 right-0 bottom-0 bg-primary-dark/10" />
 
       {isHome ? (
         <View className="flex-row items-center justify-between mb-8 z-10">
@@ -89,7 +90,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
           />
         </View>
       )}
-    </View>
+    </ImageBackground>
   );
 };
 

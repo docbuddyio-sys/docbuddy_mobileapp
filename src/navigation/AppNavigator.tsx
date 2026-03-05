@@ -18,9 +18,9 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {/* <Stack.Screen name="Signup" component={SignupScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} /> */}
-        {/* <Stack.Screen name="OTP" component={OTPScreen} /> */}
+        <Stack.Screen name="Signup" component={SignupScreen} />
+        {/* <Stack.Screen name="Login" component={LoginScreen} /> */}
+        <Stack.Screen name="OTP" component={OTPScreen} />
         <Stack.Screen name="CreateMpin" component={CreateMpinScreen} />
         <Stack.Screen name="MpinInput" component={MpinInputScreen} />
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
