@@ -26,7 +26,7 @@ const AuthService = {
    */
   googleSignup: async (data: GoogleSignupRequest): Promise<AuthResponse> => {
     try {
-      const response = await apiClient.post<AuthResponse>("/api/auth/google-signup", data);
+      const response = await apiClient.post<AuthResponse>("/api/v1/auth/google-signup", data);
 
       const { token, user } = response.data;
 

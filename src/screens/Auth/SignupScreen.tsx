@@ -9,22 +9,41 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import * as Google from "expo-auth-session/providers/google";
-import * as WebBrowser from "expo-web-browser";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import AuthHeader from "../../components/AuthHeader";
 import GoogleSignInButton from "../../components/GoogleSignInButton";
 import AuthService from "../../api/services/auth.service";
 import { GOOGLE_AUTH_CONFIG } from "../../api/config/google-auth.config";
 
-// Required for web browser to close properly after auth
-WebBrowser.maybeCompleteAuthSession();
-
 const SignupScreen = ({ navigation }: any) => {
   const [isLoading, setIsLoading] = useState(false);
 
+  React.useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: GOOGLE_AUTH_CONFIG.webClientId,
+    });
+  }, []);
+
   const handleGoogleSignup = async () => {
-    alert("Backend Integration in Progress");
-    navigation.navigate("OTP");
+    try {
+      setIsLoading(true);
+      await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signIn();
+      const tokens = await GoogleSignin.getTokens();
+
+      if (!tokens.idToken) {
+        throw new Error("No ID token received from Google");
+      }
+
+      await AuthService.googleSignup({ idToken: tokens.idToken });
+      
+      navigation.navigate("OTP");
+    } catch (error: any) {
+      console.error("Google Signup Error:", error);
+      Alert.alert("Signup Failed", error.message || "Something went wrong during Google Sign-In.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

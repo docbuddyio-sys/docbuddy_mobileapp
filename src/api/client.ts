@@ -1,7 +1,13 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import { Platform } from "react-native";
 import { storage } from "../utils/storage";
 
-const API_BASE_URL = "https://docbuddy-service.onrender.com";
+// Configuration for Environment
+const IS_LOCAL = true; // Toggle this to 'false' to use the production URL
+const LOCAL_API_URL = Platform.OS === "android" ? "http://10.0.2.2:8080" : "http://localhost:8080";
+const PROD_API_URL = "https://docbuddy-service.onrender.com";
+
+const API_BASE_URL = IS_LOCAL ? LOCAL_API_URL : PROD_API_URL;
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
