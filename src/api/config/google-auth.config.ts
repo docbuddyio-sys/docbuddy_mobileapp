@@ -14,6 +14,6 @@
  */
 
 export const GOOGLE_AUTH_CONFIG = {
-  webClientId: "846550826824-kb4qqtumi3h8kv317f240vs6m4l5ckct.apps.googleusercontent.com", // Dummy client ID for now, replace in production
-  // Expo will handle the redirect URI automatically
+  androidClientId: "846550826824-kb4qqtumi3h8kv317f240vs6m4l5ckct.apps.googleusercontent.com", // Dummy client ID for now, replace in production
+  webClientId: "846550826824-04tbo57p6grjeu8kb4epu99tvlug6l9h.apps.googleusercontent.com", // Dummy client ID for now, replace in production
 };

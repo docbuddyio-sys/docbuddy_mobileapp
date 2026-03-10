@@ -7,6 +7,13 @@
       "developmentClient": true,
       "distribution": "internal"
     },
+    "development-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "simulator": true
+      }
+    },
     "preview": {
       "android": {
         "buildType": "apk"
