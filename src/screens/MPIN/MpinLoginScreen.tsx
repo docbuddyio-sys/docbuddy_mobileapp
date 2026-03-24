@@ -13,54 +13,49 @@ import {
 } from "react-native";
 import AuthService from "../../api/services/auth.service";
 import { useUser } from "../../context/UserContext";
-import { getDeviceId } from "../../utils/deviceId"; // ← import the utility
+import { getDeviceId } from "../../utils/deviceId";
 
-const MpinInputScreen = ({ navigation }: any) => {
+const MpinLoginScreen = ({ navigation }: any) => {
   const [mpin, setMpin] = useState("");
-  const [confirmMpin, setConfirmMpin] = useState("");
   const [showMpin, setShowMpin] = useState(false);
-  const [showConfirmMpin, setShowConfirmMpin] = useState(false);
-
-  const { updateUser, user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
+  const { updateUser, user } = useUser();
 
-  const handleContinue = async () => {
+  const handleLogin = async () => {
     if (mpin.length !== 6) {
       Alert.alert("Invalid Input", "MPIN must be 6 digits");
-      return;
-    }
-    if (mpin !== confirmMpin) {
-      Alert.alert("Invalid Input", "MPINs do not match");
       return;
     }
 
     try {
       setIsLoading(true);
+
       const deviceId = await getDeviceId();
-      const response = await AuthService.mpinSetup(
+
+      const response = await AuthService.mpinLogin(
         {
           deviceId,
           mpin,
         },
-        user?.accessToken || "",
+        user?.accessToken || ""
       );
-      console.log("RAW RESPONSE:", JSON.stringify(response, null, 2));
 
-      if (response.success && response.data) {
-        console.log("MPIN Setup Response:", response);
-        return;
-        await updateUser({ accessToken: response.data.token });
-        navigation.navigate("Onboarding");
+      if (response.token) {
+        await updateUser({ accessToken: response.token });
+        if (response.name) {
+          await updateUser({ name: response.name, email: response.email });
+        }
+        navigation.navigate("Home");
       } else {
-        Alert.alert("Setup Failed", response.message || "Could not set up MPIN.");
+        Alert.alert("Login Failed", "Invalid MPIN or unexpected response.");
       }
     } catch (error: any) {
-      console.error("MPIN Setup Error:", error);
+      console.error("MPIN Login Error:", error);
       const msg =
         error?.response?.data?.message ||
         error?.message ||
-        "Something went wrong during MPIN setup.";
-      Alert.alert("Setup Failed", msg);
+        "Something went wrong during MPIN login.";
+      Alert.alert("Login Failed", msg);
     } finally {
       setIsLoading(false);
     }
@@ -78,13 +73,10 @@ const MpinInputScreen = ({ navigation }: any) => {
       >
         {/* Header with gradient background */}
         <View className="bg-blue-600 rounded-b-3xl pt-12 pb-16 px-6 relative overflow-hidden">
-          {/* Gradient effect - using absolute positioned views */}
           <View
             className="absolute top-0 left-0 right-0 bottom-0 bg-blue-700 opacity-30"
             style={{ transform: [{ rotate: "-15deg" }, { scale: 1.5 }] }}
           />
-
-          {/* Logo */}
           <View className="items-center justify-center mt-8">
             <View className="bg-white rounded-2xl p-6 shadow-lg">
               <View className="w-16 h-16 bg-blue-500 rounded-lg items-center justify-center relative">
@@ -101,17 +93,20 @@ const MpinInputScreen = ({ navigation }: any) => {
 
         {/* Content */}
         <View className="flex-1 px-6 pt-8 pb-10">
-          {/* Title */}
-          <Text className="text-3xl font-bold text-gray-900 mb-4">Create a MPIN</Text>
+          {user?.name ? (
+            <Text className="text-xl font-bold text-gray-900 mb-2 text-center">
+              Welcome back, {user.name}
+            </Text>
+          ) : null}
 
-          {/* Subtitle */}
+          <Text className="text-3xl font-bold text-gray-900 mb-4">Enter MPIN</Text>
           <Text className="text-sm text-gray-600 mb-8">
-            To set up your PIN code 6 digit code then confirm it below
+            Please enter your 6-digit MPIN to access your account.
           </Text>
 
           {/* MPIN Input */}
           <View className="mb-6">
-            <Text className="text-base font-semibold text-gray-900 mb-3">Mpin</Text>
+            <Text className="text-base font-semibold text-gray-900 mb-3">MPIN</Text>
             <View className="bg-gray-50 rounded-xl px-4 py-4 flex-row items-center border border-gray-100">
               <TextInput
                 className="flex-1 text-base text-gray-900"
@@ -122,6 +117,7 @@ const MpinInputScreen = ({ navigation }: any) => {
                 maxLength={6}
                 placeholder="*** ***"
                 placeholderTextColor="#9CA3AF"
+                autoFocus
               />
               <TouchableOpacity onPress={() => setShowMpin(!showMpin)} className="ml-2">
                 <Ionicons
@@ -133,44 +129,17 @@ const MpinInputScreen = ({ navigation }: any) => {
             </View>
           </View>
 
-          {/* Confirm MPIN Input */}
-          <View className="mb-8">
-            <Text className="text-base font-semibold text-gray-900 mb-3">Confirm Mpin</Text>
-            <View className="bg-gray-50 rounded-xl px-4 py-4 flex-row items-center border border-gray-100">
-              <TextInput
-                className="flex-1 text-base text-gray-900"
-                value={confirmMpin}
-                onChangeText={setConfirmMpin}
-                secureTextEntry={!showConfirmMpin}
-                keyboardType="number-pad"
-                maxLength={6}
-                placeholder="*** ***"
-                placeholderTextColor="#9CA3AF"
-              />
-              <TouchableOpacity
-                onPress={() => setShowConfirmMpin(!showConfirmMpin)}
-                className="ml-2"
-              >
-                <Ionicons
-                  name={showConfirmMpin ? "eye-outline" : "eye-off-outline"}
-                  size={24}
-                  color="#6B7280"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Continue Button */}
+          {/* Log In Button */}
           <TouchableOpacity
             className="bg-blue-600 rounded-xl py-4 items-center"
-            onPress={handleContinue}
+            onPress={handleLogin}
             activeOpacity={0.8}
             disabled={isLoading}
           >
             {isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text className="text-white text-lg font-semibold">Continue</Text>
+              <Text className="text-white text-lg font-semibold">Log In</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -179,4 +148,4 @@ const MpinInputScreen = ({ navigation }: any) => {
   );
 };
 
-export default MpinInputScreen;
+export default MpinLoginScreen;

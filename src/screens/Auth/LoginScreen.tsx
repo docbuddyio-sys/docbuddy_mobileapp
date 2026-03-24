@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,14 +6,62 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import AuthHeader from "../../components/AuthHeader";
 import GoogleSignInButton from "../../components/GoogleSignInButton";
+import AuthService from "../../api/services/auth.service";
+import { GOOGLE_AUTH_CONFIG } from "../../api/config/google-auth.config";
+import { useUser } from "../../context/UserContext";
 
 const LoginScreen = ({ navigation }: any) => {
-  const handleGoogleLogin = () => {
-    console.log("Google Login");
-    navigation.navigate("Home");
+  const [isLoading, setIsLoading] = useState(false);
+  const { loginUser } = useUser();
+
+  React.useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: GOOGLE_AUTH_CONFIG.webClientId,
+    });
+  }, []);
+
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoading(true);
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const idToken = (userInfo as any).data?.idToken ?? (userInfo as any).idToken;
+
+      if (!idToken) {
+        throw new Error("No ID token received from Google");
+      }
+
+      const response = await AuthService.googleLogin({ idToken });
+      console.log(response);
+
+      if (response.success && response.data) {
+        // Push the authenticated user into context so all screens reflect it
+        loginUser({
+          userId: response.data.user_id,
+          googleUserId: response.data.googleUserId,
+          name: response.data.name,
+          email: response.data.email,
+          phoneNumber: "",
+          profileImage: null,
+          accessToken: response.data.access_token,
+        });
+
+        navigation.navigate("MpinLogin");
+      } else {
+        Alert.alert("Login Failed", response.message || "Could not sign you in. Please try again.");
+      }
+    } catch (error: any) {
+      console.error("Google Login Error:", error);
+      Alert.alert("Login Failed", error.message || "Something went wrong during Google Sign-In.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -36,7 +84,13 @@ const LoginScreen = ({ navigation }: any) => {
             </Text>
 
             {/* Google Login */}
-            <GoogleSignInButton onPress={handleGoogleLogin} />
+            {isLoading ? (
+              <View className="h-12 items-center justify-center">
+                <ActivityIndicator color="#0F4CCD" />
+              </View>
+            ) : (
+              <GoogleSignInButton onPress={handleGoogleLogin} />
+            )}
 
             {/* Trust Text */}
             <Text className="text-xs text-neutral-gray500 text-center mt-4">
@@ -46,7 +100,7 @@ const LoginScreen = ({ navigation }: any) => {
 
           {/* Footer */}
           <View className="flex-row justify-center mt-12">
-            <Text className="text-sm text-neutral-gray600">Don’t have an account?</Text>
+            <Text className="text-sm text-neutral-gray600">Don't have an account?</Text>
             <TouchableOpacity onPress={() => navigation.navigate("Signup")} className="ml-1">
               <Text className="text-sm font-semibold text-primary">Sign up</Text>
             </TouchableOpacity>

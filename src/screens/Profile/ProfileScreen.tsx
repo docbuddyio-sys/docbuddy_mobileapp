@@ -15,6 +15,7 @@ import SectionHeader from "../../components/SectionHeader";
 import CustomInput from "../../components/CustomInput";
 import CustomButton from "../../components/CustomButton";
 import { useUser } from "../../context/UserContext";
+import AuthService from "../../api/services/auth.service";
 
 interface ProfileScreenProps {
   onBack?: () => void;
@@ -22,7 +23,7 @@ interface ProfileScreenProps {
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack }) => {
   const navigation = useNavigation<any>();
-  const { user, updateUser, loading } = useUser();
+  const { user, updateUser, clearUser, loading } = useUser();
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber);
@@ -51,8 +52,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack }) => {
     }
   };
 
-  const handleLogout = () => {
-    // In a real app, you would clear the auth token here
+  const handleLogout = async () => {
+    await AuthService.logout();  // clears SecureStore token + user
+    await clearUser();           // resets UserContext state
     navigation.reset({
       index: 0,
       routes: [{ name: "Login" }],

@@ -1,17 +1,20 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { UserProfile } from "../types/types";
-import { documentStorage } from "../services/documentStorage";
+import { storage } from "../utils/storage";
 
 interface UserContextType {
   user: UserProfile;
   loading: boolean;
+  /** Call this after a successful login/signup to update context + storage together */
+  loginUser: (profile: UserProfile) => void;
   updateUser: (updates: Partial<UserProfile>) => Promise<void>;
+  clearUser: () => Promise<void>;
 }
 
 const DEFAULT_USER: UserProfile = {
-  name: "Berlin Smith",
-  email: "berlin.smith@example.com",
-  phoneNumber: "+91 9876543210",
+  name: "",
+  email: "",
+  phoneNumber: "",
   profileImage: null,
 };
 
@@ -35,7 +38,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const loadUser = async () => {
     try {
-      const storedUser = await documentStorage.getUserProfile();
+      // Load from SecureStore (saved by auth.service after login/signup)
+      const storedUser = await storage.getUser();
       if (storedUser) {
         setUser(storedUser);
       }
@@ -46,18 +50,35 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  /**
+   * Called right after a successful signup/login so the whole app
+   * immediately reflects the authenticated user's data.
+   */
+  const loginUser = (profile: UserProfile) => {
+    setUser(profile);
+    // storage.saveUser is already called by auth.service, but we refresh
+    // state synchronously so no screen flickers with stale data.
+  };
+
   const updateUser = async (updates: Partial<UserProfile>) => {
     try {
       const updatedUser = { ...user, ...updates };
       setUser(updatedUser);
-      await documentStorage.saveUserProfile(updatedUser);
+      await storage.saveUser(updatedUser);
     } catch (error) {
       console.error("Error updating user profile:", error);
       throw error;
     }
   };
 
+  const clearUser = async () => {
+    setUser(DEFAULT_USER);
+    await storage.clearAll();
+  };
+
   return (
-    <UserContext.Provider value={{ user, updateUser, loading }}>{children}</UserContext.Provider>
+    <UserContext.Provider value={{ user, updateUser, loginUser, clearUser, loading }}>
+      {children}
+    </UserContext.Provider>
   );
 };

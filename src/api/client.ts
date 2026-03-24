@@ -3,15 +3,15 @@ import { Platform } from "react-native";
 import { storage } from "../utils/storage";
 
 // Configuration for Environment
-const IS_LOCAL = true; // Toggle this to 'false' to use the production URL
+const IS_LOCAL = false; // Toggle this to 'false' to use the production URL
 const LOCAL_API_URL = Platform.OS === "android" ? "http://10.0.2.2:8080" : "http://localhost:8080";
-const PROD_API_URL = "https://docbuddy-service.onrender.com";
+const PROD_API_URL = "https://lifevault-service-846550826824.us-central1.run.app";
 
 const API_BASE_URL = IS_LOCAL ? LOCAL_API_URL : PROD_API_URL;
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000,
+  timeout: 60000,
   headers: {
     "Content-Type": "application/json",
   },
