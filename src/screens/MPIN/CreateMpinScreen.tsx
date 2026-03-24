@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { useUser } from "../../context/UserContext";
+
+// No device ID needed here — this screen only navigates to MpinInput.
+// The actual deviceId is fetched inside MpinInputScreen when the API call happens.
 
 const CreateMpinScreen = ({ navigation }: any) => {
-  const [userName] = useState("Berlin Smith");
+  const { user } = useUser();
 
   const handleCreateMpin = () => {
-    console.log("Navigate to MPIN creation");
-    // Handle navigation to MPIN creation flow
     navigation.navigate("MpinInput");
   };
 
@@ -19,13 +21,10 @@ const CreateMpinScreen = ({ navigation }: any) => {
       >
         {/* Header with gradient background */}
         <View className="bg-blue-600 rounded-b-3xl pt-12 pb-20 px-6 relative overflow-hidden">
-          {/* Gradient effect - using absolute positioned views */}
           <View
             className="absolute top-0 left-0 right-0 bottom-0 bg-blue-700 opacity-30"
             style={{ transform: [{ rotate: "-15deg" }, { scale: 1.5 }] }}
           />
-
-          {/* Logo */}
           <View className="items-center justify-center mt-8">
             <View className="bg-white rounded-2xl p-6 shadow-lg">
               <View className="w-16 h-16 bg-blue-500 rounded-lg items-center justify-center relative">
@@ -45,7 +44,6 @@ const CreateMpinScreen = ({ navigation }: any) => {
           {/* Profile Avatar */}
           <View className="mb-6">
             <View className="w-24 h-24 rounded-full bg-orange-100 border-4 border-blue-500 items-center justify-center overflow-hidden">
-              {/* Avatar placeholder - you can replace with actual image */}
               <View className="w-full h-full items-center justify-center bg-orange-200">
                 <Text className="text-4xl">👨‍💼</Text>
               </View>
@@ -53,11 +51,11 @@ const CreateMpinScreen = ({ navigation }: any) => {
           </View>
 
           {/* User Name */}
-          <Text className="text-2xl font-bold text-gray-900 mb-4">{userName}</Text>
+          <Text className="text-2xl font-bold text-gray-900 mb-4">{user.name || "Welcome!"}</Text>
 
           {/* Subtitle */}
           <Text className="text-base text-gray-600 text-center mb-12 px-4">
-            Hello , We Need You to Verify{"\n"}Your Profile
+            Hello, We Need You to Verify{"\n"}Your Profile
           </Text>
 
           {/* Create MPIN Button */}

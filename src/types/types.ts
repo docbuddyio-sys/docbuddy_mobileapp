@@ -31,10 +31,16 @@ export interface Category {
 }
 
 export interface UserProfile {
+  id?: number;
+  userId?: string;
+  googleUserId?: string;
   name: string;
   email: string;
+  mobile?: string | null;
   phoneNumber: string;
   profileImage: string | null;
+  roles?: string;
+  accessToken?: string;
 }
 
 export interface Tag {
