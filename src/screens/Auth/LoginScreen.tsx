@@ -7,8 +7,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import AuthHeader from "../../components/AuthHeader";
 import GoogleSignInButton from "../../components/GoogleSignInButton";
@@ -18,6 +18,7 @@ import { useUser } from "../../context/UserContext";
 
 const LoginScreen = ({ navigation }: any) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { loginUser } = useUser();
 
   React.useEffect(() => {
@@ -27,6 +28,7 @@ const LoginScreen = ({ navigation }: any) => {
   }, []);
 
   const handleGoogleLogin = async () => {
+    setError(null);
     try {
       setIsLoading(true);
       await GoogleSignin.hasPlayServices();
@@ -38,8 +40,8 @@ const LoginScreen = ({ navigation }: any) => {
       }
 
       const response = await AuthService.googleLogin({ idToken });
-      console.log(response);
 
+      console.log("response", response);
       if (response.success && response.data) {
         // Push the authenticated user into context so all screens reflect it
         loginUser({
@@ -54,11 +56,11 @@ const LoginScreen = ({ navigation }: any) => {
 
         navigation.navigate("MpinLogin");
       } else {
-        Alert.alert("Login Failed", response.message || "Could not sign you in. Please try again.");
+        setError(response.message || "Could not sign you in. Please try again.");
       }
-    } catch (error: any) {
-      console.error("Google Login Error:", error);
-      Alert.alert("Login Failed", error.message || "Something went wrong during Google Sign-In.");
+    } catch (err: any) {
+      console.error("Google Login Error:", err);
+      setError(err?.message || "Something went wrong during Google Sign-In.");
     } finally {
       setIsLoading(false);
     }
@@ -79,9 +81,33 @@ const LoginScreen = ({ navigation }: any) => {
               Welcome back
             </Text>
 
-            <Text className="text-sm text-neutral-gray600 leading-relaxed mb-12">
+            <Text className="text-sm text-neutral-gray600 leading-relaxed mb-8">
               Sign in to Doc Buddy and continue managing your documents securely and professionally.
             </Text>
+
+            {/* ── Inline Error Banner ── */}
+            {error !== null && (
+              <View className="rounded-2xl mb-6 overflow-hidden border bg-red-50 border-red-200">
+                <View className="flex-row items-start px-4 pt-4 pb-3">
+                  <View className="w-8 h-8 rounded-full items-center justify-center mr-3 mt-0.5 flex-shrink-0 bg-red-100">
+                    <Ionicons name="alert-circle-outline" size={18} color="#DC2626" />
+                  </View>
+
+                  <View className="flex-1">
+                    <Text className="text-sm font-semibold mb-0.5 text-red-800">Login Failed</Text>
+                    <Text className="text-xs leading-relaxed text-red-700">{error}</Text>
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={() => setError(null)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    className="ml-2 mt-0.5"
+                  >
+                    <Ionicons name="close" size={16} color="#FCA5A5" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
 
             {/* Google Login */}
             {isLoading ? (

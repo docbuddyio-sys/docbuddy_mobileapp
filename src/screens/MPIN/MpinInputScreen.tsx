@@ -23,44 +23,37 @@ const MpinInputScreen = ({ navigation }: any) => {
 
   const { updateUser, user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleContinue = async () => {
+    setError(null);
     if (mpin.length !== 6) {
-      Alert.alert("Invalid Input", "MPIN must be 6 digits");
+      setError("MPIN must be 6 digits.");
       return;
     }
     if (mpin !== confirmMpin) {
-      Alert.alert("Invalid Input", "MPINs do not match");
+      setError("MPINs do not match.");
       return;
     }
 
     try {
       setIsLoading(true);
       const deviceId = await getDeviceId();
-      const response = await AuthService.mpinSetup(
-        {
-          deviceId,
-          mpin,
-        },
-        user?.accessToken || "",
-      );
-      console.log("RAW RESPONSE:", JSON.stringify(response, null, 2));
-
+      const response = await AuthService.mpinSetup({
+        deviceId,
+        mpin,
+      });
       if (response.success && response.data) {
-        console.log("MPIN Setup Response:", response);
-        return;
         await updateUser({ accessToken: response.data.token });
         navigation.navigate("Onboarding");
       } else {
-        Alert.alert("Setup Failed", response.message || "Could not set up MPIN.");
+        setError(response.message || "Could not set up MPIN.");
       }
-    } catch (error: any) {
-      console.error("MPIN Setup Error:", error);
+    } catch (err: any) {
+      console.error("MPIN Setup Error:", err);
       const msg =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Something went wrong during MPIN setup.";
-      Alert.alert("Setup Failed", msg);
+        err?.response?.data?.message || err?.message || "Something went wrong during MPIN setup.";
+      setError(msg);
     } finally {
       setIsLoading(false);
     }
@@ -108,6 +101,30 @@ const MpinInputScreen = ({ navigation }: any) => {
           <Text className="text-sm text-gray-600 mb-8">
             To set up your PIN code 6 digit code then confirm it below
           </Text>
+
+          {/* ── Inline Error Banner ── */}
+          {error !== null && (
+            <View className="rounded-2xl mb-6 overflow-hidden border bg-red-50 border-red-200">
+              <View className="flex-row items-start px-4 pt-4 pb-3">
+                <View className="w-8 h-8 rounded-full items-center justify-center mr-3 mt-0.5 flex-shrink-0 bg-red-100">
+                  <Ionicons name="alert-circle-outline" size={18} color="#DC2626" />
+                </View>
+
+                <View className="flex-1">
+                  <Text className="text-sm font-semibold mb-0.5 text-red-800">Setup Failed</Text>
+                  <Text className="text-xs leading-relaxed text-red-700">{error}</Text>
+                </View>
+
+                <TouchableOpacity
+                  onPress={() => setError(null)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  className="ml-2 mt-0.5"
+                >
+                  <Ionicons name="close" size={16} color="#FCA5A5" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
 
           {/* MPIN Input */}
           <View className="mb-6">

@@ -56,7 +56,11 @@ const SignupScreen = ({ navigation }: any) => {
         throw new Error("No ID token received from Google");
       }
 
+      console.log("Google Token:", idToken);
+
       const response = await AuthService.googleSignup({ idToken });
+
+      console.log("App Signup Response:", response.data);
 
       if (response.success && response.data) {
         loginUser({
@@ -66,7 +70,7 @@ const SignupScreen = ({ navigation }: any) => {
           email: response.data.email,
           phoneNumber: "",
           profileImage: null,
-          accessToken: response.data.access_token,
+          accessToken: response.data.token,
         });
 
         navigation.navigate("CreateMpin");

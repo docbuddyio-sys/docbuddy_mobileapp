@@ -2,21 +2,6 @@ import apiClient from "../client";
 import { storage } from "../../utils/storage";
 import { UserProfile } from "../../types/types";
 
-export interface AuthUserData {
-  access_token: string;
-  user_id: string;
-  googleUserId: string;
-  name: string;
-  email: string;
-}
-
-export interface AuthApiResponse {
-  success: boolean;
-  message: string;
-  data: AuthUserData;
-  timestamp: string;
-}
-
 export interface GoogleSignupRequest {
   idToken: string;
 }
@@ -48,14 +33,14 @@ export interface MpinLoginResponse {
 /**
  * Maps the raw API data to UserProfile used throughout the app.
  */
-const mapToUserProfile = (data: AuthUserData): UserProfile => ({
+const mapToUserProfile = (data: any): UserProfile => ({
   userId: data.user_id,
   googleUserId: data.googleUserId,
   name: data.name,
   email: data.email,
   phoneNumber: "",
   profileImage: null,
-  accessToken: data.access_token,
+  accessToken: data.access_token || data.token || data.accessToken,
 });
 
 const AuthService = {
@@ -63,16 +48,19 @@ const AuthService = {
    * Registers a new user using Google ID Token.
    * Endpoint: POST /api/v1/auth/google-signup
    */
-  googleSignup: async (data: GoogleSignupRequest): Promise<AuthApiResponse> => {
+  googleSignup: async (data: GoogleSignupRequest) => {
     try {
-      const response = await apiClient.post<AuthApiResponse>("/api/v1/auth/google-signup", data);
+      const response = await apiClient.post("/api/v1/auth/google-signup", data);
       const apiResponse = response.data;
 
       if (apiResponse.success && apiResponse.data) {
-        const { access_token } = apiResponse.data;
+        const extractedToken =
+          apiResponse.data.access_token || apiResponse.data.token || apiResponse.data.accessToken;
+
         const userProfile = mapToUserProfile(apiResponse.data);
-        if (access_token) {
-          await storage.saveToken(access_token);
+
+        if (extractedToken) {
+          await storage.saveToken(extractedToken);
         }
         await storage.saveUser(userProfile);
       }
@@ -87,16 +75,19 @@ const AuthService = {
    * Signs in an existing user using Google ID Token.
    * Endpoint: POST /api/v1/auth/google-login
    */
-  googleLogin: async (data: GoogleSignupRequest): Promise<AuthApiResponse> => {
+  googleLogin: async (data: GoogleSignupRequest) => {
     try {
-      const response = await apiClient.post<AuthApiResponse>("/api/v1/auth/google-login", data);
+      const response = await apiClient.post("/api/v1/auth/google-login", data);
       const apiResponse = response.data;
 
       if (apiResponse.success && apiResponse.data) {
-        const { access_token } = apiResponse.data;
+        const extractedToken =
+          apiResponse.data.access_token || apiResponse.data.token || apiResponse.data.accessToken;
+
         const userProfile = mapToUserProfile(apiResponse.data);
-        if (access_token) {
-          await storage.saveToken(access_token);
+
+        if (extractedToken) {
+          await storage.saveToken(extractedToken);
         }
         await storage.saveUser(userProfile);
       }
@@ -120,7 +111,6 @@ const AuthService = {
       if (!token) {
         throw new Error("No access token found. Please sign in again.");
       }
-
       const response = await apiClient.post<MpinSetupResponse>("/api/v1/auth/mpin-setup", data, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -147,7 +137,6 @@ const AuthService = {
    */
   mpinLogin: async (data: MpinRequest): Promise<MpinLoginResponse> => {
     try {
-      // ✅ Read the token from storage (same pattern as mpinSetup)
       const token = await storage.getToken();
 
       if (!token) {
@@ -161,6 +150,8 @@ const AuthService = {
       });
 
       const apiResponse = response.data;
+
+      console.log("MPIN apiResponse", apiResponse);
 
       if (apiResponse.token) {
         await storage.saveToken(apiResponse.token);
